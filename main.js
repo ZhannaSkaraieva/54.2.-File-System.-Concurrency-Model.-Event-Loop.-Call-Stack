@@ -1,44 +1,63 @@
-//1.импортируем модуль 
+//1. Импортируем модули.
 
-const { error } = require('console');
-const http = require('http'); //http: Модуль http дозволяє створювати HTTP-сервери та клієнтів. 
+
+const http = require('http'); //http: Модуль http дозволяє створювати HTTP-сервери . 
 // Це основний модуль, який використовуємо для розробки веб-застосунків у Node.js.
 const fs = require('fs');// подключение модуля файловой системы для работы с файлами 
-const path = require('path');// для формирования корректого пути
+
 
 // 2.создание файла
-const content = 'Це нові дані для запису у файл.';
-fs.writeFile('user.txt', content, (err) => {
+const content = `Це нові дані для запису у файл.`;
+fs.writeFile('user.txt', content,'utf8', (err) => { //модуль fs.writeFile записує рядок content у файл user.txt. 
+// Функція зворотного виклику викликається після завершення операції запису.
   if (err) {
-    console.error('Error writing file:', err);
+    console.error(`Помилка запису файла:`, err);
     return;
   }
-  console.log('File user.txt written successfully!');
-});
+  console.log(`Файл user.txt записан успішно!`);
+}
+);
 
 
-// 3.Create an HTTP server
+// 3.CСоздаем  HTTP сервер.
 const server = http.createServer((req, res) => {
-    //createServer это встроенный метод для создания сервера
-    //метод содержит callback function которая вызывается каждый раз , когда на сервер идет обращение
+    //createServer это встроенный МЕТОД для создания сервера
+    //метод содержит callback функцию которая вызывается каждый раз , когда на сервер идет обращение
     //функция принимает два аргумента (req, res) єто обьект запроса и ответа 
-    console.log('Server request');
-    //console.log(req.url, req.method);
-    res.setHeader('Content-Type', 'text/plain'); //используется для установки одного значения заголовка для неявных заголовков.
-    //Content-Type - помогает браузеру определить какого типа данные ему были отправленны
-    //res.write('hello');
-    res.end();//Этот метод сигнализирует серверу, что все заголовки и тело ответа были отправлены; 
-    //любой ответ нужно завершать этим методом , чтобы вернуть контроль браузеру.
-
+  console.log(`Запит до сервера`);
+  console.log(req.url, req.method);
+  //res.setHeader - используется для установки одного значения заголовка для неявных заголовков. 
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8'); 
+  //Метод "Content-Type"- помогает браузеру определить какого типа данные ему были отправленны
+  
+  // Читання файлу
+  if (req.url === '/') { //обращение на корневой роут ( если пользовательзашел на сайт , по сервер начинает читать фаил user.txt)
+    fs.readFile('user.txt', 'utf8', (err, data) => { //используя File System читаем файл user.txt
+    //utf8 кодировка 
+    // UTF-8 (Unicode Transformation Format, 8-bit) — это система кодирования, работающая по стандарту Unicode.
+      if (err) {
+        console.log(`Помилка читання файлу:`,err);
+        res.end();//Этот метод сигнализирует серверу, что все заголовки и тело ответа были отправлены; 
+        //любой ответ нужно завершать этим методом , чтобы вернуть контроль браузеру.
+      }
+      else {
+        res.write(`Вміст файлу: ${data}`); // данные виводятся в браузере
+        res.end();
+      }
+    }) 
+  }
+  
 });
+    
 server.listen(3000, 'localhost', (err) => {//localhost -имя порта по умолчанию
+  //Запускает сервер на localhost:3000, слушая входящие запросы.
     if (err) {
-        console.log('Server error:', err);
+        console.log(`Server error:`, err);
     } else {
-        console.log('listening port 3000');
+        console.log(`listening port 3000`);
     }
     // функция СВ будет срабатывать при ошибке.
 }); 
 
-//при запуске node main  получаем сообщение listening port 3000, значит сервер создан.
+//при запуске node main  получаем сообщение listening port 3000, значит сервер создан и слушает.
 
